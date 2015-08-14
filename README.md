@@ -1,4 +1,4 @@
-# IoT-Control-Webapplication
+# IoT-Control Webapplication
 A webapplication for controlling your IoT devices, with a focus on a Material design. This application provides a user interface for controlling your IoT devices. It communicates with a server to display your devices and to control them.
 
 ## Requirements
