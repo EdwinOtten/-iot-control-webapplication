@@ -1,0 +1,21 @@
+html {
+        overflow-y: scroll;
+}
+html[data-useragent*='IE'] .page-footer {
+        position: fixed; bottom: 0px; left: 0px; right: 0px;
+}
+body {
+        display: flex;
+        min-height: 100vh;
+        flex-direction: column;
+}
+main {
+        padding-top: 20px;
+        flex: 1 0 auto;
+}
+table td {
+        font-size: 1.1em;
+}
+.footer-copyright {
+        font-size: 0.85em;
+}
