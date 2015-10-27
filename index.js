@@ -42,6 +42,7 @@ clients.on('connect', function(socket){
   var currentDevices = [
       new Device('Schemerlamp', DEVICE_TYPE_LIGHT),
       new Device('Nachtlampje', DEVICE_TYPE_LIGHT),
+      new Device('Tuinlamp', DEVICE_TYPE_LIGHT),
       new Device('Keuken spotjes', DEVICE_TYPE_LIGHT),
       new Device('Plafoniere', DEVICE_TYPE_LIGHT),
       new Device('Bureaulampje', DEVICE_TYPE_LIGHT),
