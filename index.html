@@ -55,10 +55,52 @@
     <div class="row">
       <div class="col l10 offset-l1 m12 offset-m0 offset-m0">
 
-        <div class="row">
+
+        <div class="row section" id="login-section">
+          <div class="col l6 offset-l3 m10 offset-m1 s12 offset-s0">
+            <div class="card">
+              <div class="card-content">
+
+                <span class="card-title teal-text">Inloggen</span>
+                <form class="col s12" id="login-form">
+                  <div class="row">
+                    <div class="input-field col s12">
+                      <i class="material-icons prefix">account_circle</i>
+                      <input id="login-form-username" type="text" class="validate" value="Edwin">
+                      <label for="username">Gebruikersnaam</label>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="input-field col s12">
+                      <i class="material-icons prefix">vpn_key</i>
+                      <input id="login-form-password" type="password" class="validate" value="wachtwoord123">
+                      <label for="password">Wachtwoord</label>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <button class="btn waves-effect waves-light right" type="submit" name="action">Log in
+                      <i class="material-icons right">send</i>
+                    </button>
+                  </div>
+                </form>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+        <div class="row section" id="cards-area">
+        </div>
+
+
+
+        <div class="row section">
           <div class="col l12 m12 s12">
             <div class="card">
               <div class="card-content">
+
                 <i class="small material-icons red-text text-lighten-2" style="vertical-align: middle; font-size: 2.3rem;">bug_report</i>
                 <span class="card-title red-text text-darken-1" style="vertical-align: middle; padding-left: 14px;">Socket.IO log</span>
                 <div class="row">
@@ -66,13 +108,12 @@
                     <pre id="logs"></pre>
                   </div>
                 </div>
+
               </div>
             </div>
           </div>
         </div>
 
-        <div class="row" id="cards-area">
-        </div>
 
       </div>
     </div>
@@ -87,6 +128,8 @@
   <script>
     $(function() {
 
+      var deviceList = [];
+
       $('.button-collapse').sideNav({
           menuWidth: 300, // Default is 240
           edge: 'left', // Choose the horizontal origin
@@ -95,15 +138,53 @@
       );
 
       var socket = io('/clients');
+
+      $('#login-form').submit(function( event ) {
+        event.preventDefault();
+        socket.emit('auth',{username:$('#login-form-username').val(), password:$('#login-form-password').val()});
+      });
+
+
+      $(document).on('change' , '.light-switch' , function()
+      {
+        console.log('light switch changed');
+        for (i = 0; i < deviceList.length; i++) {
+          var device = deviceList[i];
+          console.log(device);
+          if ($(this).data('device-id') == device.id) {
+            device.values[0] = this.checked?1:0;;
+            socket.emit('device', deviceList[i]);
+            return;
+          }
+        }
+      });
+
+      $("input[type='checkbox'].light-switch").change(function() 
+      {
+        
+      });
+
+      socket.on('login-fail', function(){
+        $('#login-form-username').addClass('invalid');
+        $('#login-form-password').addClass('invalid');
+        $('#login-form-username').removeClass('valid');
+        $('#login-form-password').removeClass('valid');
+      });
+
+      socket.on('login-success', function(){
+        $('#login-section').remove();
+      });
+
       socket.on('controlstationCount', function(controlstationCount){
         log('Number of controlstations: ' + controlstationCount );
       });
       socket.on('devices', function(devices){
         log('Received ' + devices.length + ' devices' );
+        deviceList = devices;
         $('#cards-area').html('');
-        for(var i in devices)
+        for(var i in deviceList)
         {
-            addDeviceCard(devices[i]);
+          addDeviceCard(devices[i]);
         }
       });
 
@@ -119,21 +200,29 @@
     const DEVICE_TYPE_LIGHT = 'light-on-off';
     const DEVICE_TYPE_DIMMER = 'light-dimmer';
     function Device(name, type) {
+      this.id = 0;
       this.name = name;
       this.type = type;
+      switch (type) {
+        case DEVICE_TYPE_DIMMER: 
+          this.values = [0,0];
+        default: 
+          this.values = [0];
+          break;
+      }
     }
 
     function addDeviceCard(device) {
       var card = $("<div/>").attr("class", "col l6 m12").append(getBasicCard('wb_incandescent', device.name));
 
-      var cardContent = $("<div/>").attr("class", "row").html('<div class="col l7 m8 s12">'+ 
-                    '<p style="margin-bottom: 16px;">Schakel dit apparaat aan of uit.</p>'+ 
+      var cardContent = $("<div/>").attr("class", "row").html('<div class="col l7 m8 s12" style="margin-bottom: 2em;">'+ 
+                    '<p>Schakel dit apparaat aan of uit.</p>'+ 
                   '</div>'+ 
                   '<div class="col l5 m4 s12 right">'+ 
                     '<div class="switch center">'+ 
                       '<label>'+ 
                         'Uit'+ 
-                        '<input type="checkbox">'+ 
+                        '<input type="checkbox" class="light-switch" data-device-id="'+device.id+'">'+ 
                         '<span class="lever"></span>'+ 
                         'Aan'+ 
                       '</label>'+ 
